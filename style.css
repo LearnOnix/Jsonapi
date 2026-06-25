@@ -1,0 +1,115 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI;
+}
+
+body{
+background:#09090f;
+color:white;
+height:100vh;
+overflow-x:hidden;
+}
+
+.bg{
+position:fixed;
+inset:0;
+
+background:
+radial-gradient(circle at top,
+#6d28d9,
+transparent 40%),
+
+radial-gradient(circle at bottom,
+#06b6d4,
+transparent 40%);
+
+filter:blur(120px);
+opacity:.7;
+z-index:-1;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:40px;
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+font-size:45px;
+letter-spacing:4px;
+}
+
+#fileInput{
+width:100%;
+padding:15px;
+margin-bottom:20px;
+}
+
+.searchBox{
+display:flex;
+gap:10px;
+}
+
+.searchBox input{
+flex:1;
+padding:15px;
+border:none;
+border-radius:15px;
+background:#151522;
+color:white;
+}
+
+button{
+padding:15px 25px;
+border:none;
+border-radius:15px;
+cursor:pointer;
+background:#7c3aed;
+color:white;
+font-weight:bold;
+}
+
+button:hover{
+transform:scale(1.03);
+}
+
+.card{
+margin-top:30px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.1);
+padding:25px;
+border-radius:20px;
+animation:show .4s ease;
+}
+
+.row{
+margin:12px 0;
+font-size:18px;
+}
+
+.label{
+color:#60a5fa;
+font-weight:bold;
+}
+
+.notfound{
+margin-top:30px;
+color:#f87171;
+font-size:20px;
+}
+
+@keyframes show{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:none;
+}
+}

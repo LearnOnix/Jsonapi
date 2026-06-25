@@ -1,9 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Anime JSON Search</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Database Search</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#070b17;
+color:#fff;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+.bg{
+position:fixed;
+inset:0;
+z-index:-1;
+
+background:
+radial-gradient(circle at 20% 20%, #7c3aed55, transparent 35%),
+radial-gradient(circle at 80% 20%, #06b6d455, transparent 35%),
+radial-gradient(circle at 50% 100%, #ec489955, transparent 35%);
+
+filter:blur(120px);
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:30px 20px;
+}
+
+.title{
+font-size:42px;
+font-weight:800;
+text-align:center;
+margin-bottom:10px;
+}
+
+.subtitle{
+text-align:center;
+opacity:.8;
+margin-bottom:30px;
+}
+
+.search{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.search input{
+flex:1;
+padding:15px;
+border:none;
+outline:none;
+border-radius:15px;
+background:#12192b;
+color:white;
+font-size:16px;
+}
+
+.search button{
+padding:15px 25px;
+border:none;
+border-radius:15px;
+cursor:pointer;
+background:linear-gradient(135deg,#7c3aed,#06b6d4);
+color:white;
+font-weight:bold;
+}
+
+.info{
+text-align:center;
+margin-bottom:20px;
+opacity:.8;
+}
+
+.card{
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(15px);
+border:1px solid rgba(255,255,255,.1);
+border-radius:20px;
+padding:25px;
+}
+
+.row{
+padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,.08);
+word-break:break-word;
+}
+
+.row:last-child{
+border-bottom:none;
+}
+
+.label{
+color:#60a5fa;
+font-weight:bold;
+margin-right:8px;
+}
+
+.notfound{
+padding:25px;
+text-align:center;
+background:rgba(255,0,0,.08);
+border-radius:15px;
+}
+
+.loading{
+text-align:center;
+padding:30px;
+}
+</style>
 </head>
 <body>
 
@@ -11,31 +128,214 @@
 
 <div class="container">
 
-    <h1>ANIME DATA SEARCH</h1>
+<div class="title">ANIME DATABASE</div>
 
-    <input
-        type="file"
-        id="fileInput"
-        accept=".json"
-    >
+<div class="subtitle">
+Search by ID or Username
+</div>
 
-    <div class="searchBox">
+<div class="search">
 
-        <input
-            id="searchInput"
-            placeholder="Search by ID or Username..."
-        >
+<input
+id="query"
+placeholder="Enter ID or Username..."
+>
 
-        <button id="searchBtn">
-            Search
-        </button>
-
-    </div>
-
-    <div id="result"></div>
+<button onclick="searchRecord()">
+Search
+</button>
 
 </div>
 
-<script src="script.js"></script>
+<div class="info" id="status">
+Loading database...
+</div>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+let database = [];
+const idMap = new Map();
+const usernameMap = new Map();
+
+async function loadDatabase(){
+
+try{
+
+const response =
+await fetch("converted_data.json");
+
+database =
+await response.json();
+
+for(const user of database){
+
+if(user.id){
+
+idMap.set(
+String(user.id),
+user
+);
+
+}
+
+if(user.username){
+
+usernameMap.set(
+String(user.username)
+.toLowerCase(),
+user
+);
+
+}
+
+}
+
+document
+.getElementById("status")
+.innerHTML =
+`Loaded ${database.length.toLocaleString()} records`;
+
+autoSearch();
+
+}
+catch(err){
+
+document
+.getElementById("status")
+.innerHTML =
+"Failed to load database.json";
+
+console.error(err);
+
+}
+
+}
+
+function renderUser(user){
+
+return `
+<div class="card">
+
+<div class="row">
+<span class="label">ID:</span>
+${user.id ?? "N/A"}
+</div>
+
+<div class="row">
+<span class="label">NAME:</span>
+${user.name ?? "N/A"}
+</div>
+
+<div class="row">
+<span class="label">USERNAME:</span>
+${user.username ?? "N/A"}
+</div>
+
+<div class="row">
+<span class="label">PHONE:</span>
+${user.phone ?? "N/A"}
+</div>
+
+</div>
+`;
+
+}
+
+function searchRecord(){
+
+const query =
+document
+.getElementById("query")
+.value
+.trim();
+
+if(!query) return;
+
+const user =
+idMap.get(query) ||
+usernameMap.get(
+query.toLowerCase()
+);
+
+const result =
+document.getElementById("result");
+
+if(user){
+
+result.innerHTML =
+renderUser(user);
+
+}
+else{
+
+result.innerHTML =
+`
+<div class="notfound">
+No Record Found
+</div>
+`;
+
+}
+
+}
+
+function autoSearch(){
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const id =
+params.get("id");
+
+const username =
+params.get("username");
+
+if(id){
+
+document
+.getElementById("query")
+.value = id;
+
+searchRecord();
+
+}
+
+if(username){
+
+document
+.getElementById("query")
+.value = username;
+
+searchRecord();
+
+}
+
+}
+
+document
+.getElementById("query")
+.addEventListener(
+"keypress",
+e=>{
+
+if(e.key==="Enter"){
+
+searchRecord();
+
+}
+
+}
+);
+
+loadDatabase();
+
+</script>
+
 </body>
 </html>
